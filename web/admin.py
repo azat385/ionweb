@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from .models import Tag
+from .models import Tag, Tag_group
 
 from django.contrib import admin
 
@@ -26,4 +26,5 @@ class PageAdminTag(admin.ModelAdmin):
     list_per_page = 25
 
 admin.site.register(Tag, PageAdminTag)
+admin.site.register(Tag_group, PageAdminTag)
 # Register your models here.

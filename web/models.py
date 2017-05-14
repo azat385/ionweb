@@ -4,8 +4,9 @@ from django.utils.encoding import python_2_unicode_compatible
 
 from django.db import models
 
+
 @python_2_unicode_compatible
-class Tag(models.Model):
+class Tag_group(models.Model):
     name = models.CharField(max_length=50, null=False)
     description_short = models.CharField(max_length=50, null=True, blank=True)
     description_long = models.CharField(max_length=200, null=True, blank=True)
@@ -18,14 +19,49 @@ class Tag(models.Model):
     multiplier = models.FloatField(default=1)
     koef = models.FloatField(default=1)
 
-    group = models.IntegerField(default=0)
+
+@python_2_unicode_compatible
+class Tag(models.Model):
+    name = models.CharField(max_length=50, null=False)
+    description_short = models.CharField(max_length=50, null=True, blank=True)
+    description_long = models.CharField(max_length=200, null=True, blank=True)
+    comment = models.CharField(max_length=200, null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+    group = models.ForeignKey(Tag_group)
+    # default=lambda: Tag_group.objects.get(id=1))
     show = models.BooleanField(default=False)
+    increasing = models.BooleanField(default=False)
+    variable = models.BooleanField(default=False)
+
 
 # @python_2_unicode_compatible
 class Data(models.Model):
-    tag_id = models.ForeignKey(Tag)
+    tag = models.ForeignKey(Tag)
     value = models.FloatField()
     stime = models.CharField(max_length=30)
 
 
+@python_2_unicode_compatible
+class Hourly(models.Model):
+    tag = models.ForeignKey(Tag)
+    start_data = models.ForeignKey(Data, null=True, related_name='Hourly.start_data+')
+    end_data = models.ForeignKey(Data, null=True, related_name='Hourly.end_data+')
+    value = models.FloatField()
+    stime = models.CharField(max_length=30)
 
+    def __str__(self):
+        return self.tag
+
+
+@python_2_unicode_compatible
+class Daily(models.Model):
+    tag = models.ForeignKey(Tag)
+    start_data = models.ForeignKey(Data, null=True, related_name='Daily.start_data+')
+    end_data = models.ForeignKey(Data, null=True, related_name='Daily.end_data+')
+    value = models.FloatField()
+    stime = models.CharField(max_length=30)
+
+    def __str__(self):
+        return self.tag
