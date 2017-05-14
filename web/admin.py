@@ -23,7 +23,9 @@ class PageAdminTag(admin.ModelAdmin):
     # list_display = ('name', 'description_short', 'description_long', 'comment', 'device_type')
     # list_editable = ('description_short', 'description_long', 'comment', 'device_type')
     # search_fields = ('device_type',)
-    list_per_page = 25
+    list_per_page = 50
+    ordering = ('id', )
+
 
 admin.site.register(Tag, PageAdminTag)
 admin.site.register(Tag_group, PageAdminTag)
