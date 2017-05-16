@@ -1,14 +1,33 @@
 # -*- coding: utf-8 -*-
+
+import logging
+from logging.handlers import RotatingFileHandler
+
+# format the log entries
+formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
+
+handler = RotatingFileHandler('filldb.log',
+                              mode='a',
+                              maxBytes=20*1024*1024,
+                              backupCount=5,
+                              encoding=None,
+                              delay=0)
+handler.setFormatter(formatter)
+logger = logging.getLogger(__name__)
+logger.addHandler(handler)
+logger.setLevel(logging.DEBUG)
+
 import os
-# import sys
 import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ionweb.settings')
 # os.environ['DJANGO_SETTINGS_MODULE'] = 'ionweb.settings'
 django.setup()
 
 
+from web.models import Tag, Tag_group, Hourly, Data
+from datetime import datetime
+
 def recalc_tag_koef():
-    from web.models import Tag_group
     all_tag = Tag_group.objects.all()
 
     for t in all_tag:
@@ -17,7 +36,6 @@ def recalc_tag_koef():
 
 
 def mer230_base_tags():
-    from web.models import Tag
     tt_dict = [
         {'pos': 1, 'name': 'Ts_active',},
         {'pos': 2, 'name': 'Ts_reactive',},
@@ -52,40 +70,37 @@ def mer230_base_tags():
                 group_id=1)
         t.save()
 
-from web.models import Tag, Tag_group, Hourly, Data
-from datetime import datetime
-
 
 def data_sorted_records_m_h(current_tag):
     last_record_hourly = Hourly.objects.filter(tag=current_tag).order_by('-id').first()
     if last_record_hourly is None:
         last_record_hourly_stime = datetime(2017, 1, 1, tzinfo=None)
+        logger.debug("No last date in hourly table. The default is used")
     else:
         last_record_hourly_stime = last_record_hourly.ts
-    # print Data.objects.count()
     data_records = Data.objects.filter(ts__gt=last_record_hourly_stime).filter(
                                        tag=current_tag).filter(ts__minute__lt=2).all()
     prev_hour = 66
     tag_list = []
-    # print len(data_records)
     for r in data_records:
         hour = r.ts.hour
         if prev_hour != hour:
             tag_list.append(r)
-            # print r
             prev_hour = hour
     return tag_list
 
+
 def fill_hourly():
+    logger.debug('Start adding hourly table....')
     tags = Tag.objects.filter(increasing=True).all()
+    added_rows = 0
     for tag in tags:
         data_records = data_sorted_records_m_h(current_tag=tag)
-        # print data_records
         if data_records is None:
-            print "Tag={} data is empty".format(tag)
+            logger.debug("Tag={} data is empty".format(tag))
             continue
         if len(data_records)<2:
-            print "Tag={} data record less then 2!!! not enough to calc difference".format(tag)
+            logger.debug("Tag={} data record less then 2!!! not enough to calc difference".format(tag))
             continue
         for i, d in enumerate(data_records):
             if i == 0:
@@ -96,10 +111,12 @@ def fill_hourly():
                                 end_data=d,
                                 value=d.value-d_prev.value,
                                 ts=d.ts.replace(minute=0, second=0, microsecond=0))
-            print new_hourly
+            logger.debug(new_hourly)
             new_hourly.save()
+            added_rows += 1
             d_prev = d
-
+    logger.info('Totaly added rows: {}'.format(added_rows))
+    logger.debug('End adding hourly table...')
 
 
 if __name__ == '__main__':

@@ -32,7 +32,7 @@ class PageAdminHourly(admin.ModelAdmin):
     list_display = ('id', 'tag', 'value', 'ts', 'start_data', 'end_data')
     list_display_links = ('id',)
     list_per_page = 50
-    ordering = ('id',)
+    # ordering = ('id',)
 
 
 class PageAdminTag(admin.ModelAdmin):
