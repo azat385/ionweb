@@ -3,6 +3,7 @@ import os
 # import sys
 import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ionweb.settings')
+# os.environ['DJANGO_SETTINGS_MODULE'] = 'ionweb.settings'
 django.setup()
 
 
