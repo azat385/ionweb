@@ -18,6 +18,7 @@ class Tag_group(models.Model):
     divider = models.FloatField(default=1)
     multiplier = models.FloatField(default=1)
     koef = models.FloatField(default=1)
+    unit = models.CharField(max_length=10, null=True, blank=True)
 
 
 @python_2_unicode_compatible
@@ -40,7 +41,11 @@ class Tag(models.Model):
 class Data(models.Model):
     tag = models.ForeignKey(Tag)
     value = models.FloatField()
-    stime = models.CharField(max_length=30)
+    ts = models.DateTimeField()
+
+    def __str__(self):
+        return "Data: id={} tag={} value={} ts={}".format(
+            self.id, self.tag, self.value, self.ts)
 
 
 @python_2_unicode_compatible
@@ -49,10 +54,11 @@ class Hourly(models.Model):
     start_data = models.ForeignKey(Data, null=True, related_name='Hourly.start_data+')
     end_data = models.ForeignKey(Data, null=True, related_name='Hourly.end_data+')
     value = models.FloatField()
-    stime = models.CharField(max_length=30)
+    ts = models.DateTimeField()
 
     def __str__(self):
-        return self.tag
+        return "Hourly: id={} tag={} value={} ts={} start_d={} end_d={}".format(
+            self.id, self.tag, self.value, self.ts, self.start_data, self.end_data)
 
 
 @python_2_unicode_compatible
@@ -61,7 +67,7 @@ class Daily(models.Model):
     start_data = models.ForeignKey(Data, null=True, related_name='Daily.start_data+')
     end_data = models.ForeignKey(Data, null=True, related_name='Daily.end_data+')
     value = models.FloatField()
-    stime = models.CharField(max_length=30)
+    ts = models.DateTimeField()
 
     def __str__(self):
         return self.tag

@@ -23,7 +23,7 @@ def mer230_base_tags():
         {'pos': 3, 'name': 'T1_active',},
         {'pos': 4, 'name': 'T1_reactive',},
         {'pos': 5, 'name': 'T2_active',},
-        {'pos': 6, 'name': 'T3_reactive',},
+        {'pos': 6, 'name': 'T2_reactive',},
         {'pos': 7, 'name': 'Ts_phaseA',},
         {'pos': 8, 'name': 'Ts_phaseB',},
         {'pos': 9, 'name': 'Ts_phaseC',},
@@ -51,6 +51,57 @@ def mer230_base_tags():
                 group_id=1)
         t.save()
 
+from web.models import Tag, Tag_group, Hourly, Data
+from datetime import datetime
+
+
+def data_sorted_records_m_h(current_tag):
+    last_record_hourly = Hourly.objects.filter(tag=current_tag).order_by('-id').first()
+    if last_record_hourly is None:
+        last_record_hourly_stime = datetime(2017, 1, 1, tzinfo=None)
+    else:
+        last_record_hourly_stime = last_record_hourly.ts
+    # print Data.objects.count()
+    data_records = Data.objects.filter(ts__gt=last_record_hourly_stime).filter(
+                                       tag=current_tag).filter(ts__minute__lt=2).all()
+    prev_hour = 66
+    tag_list = []
+    # print len(data_records)
+    for r in data_records:
+        hour = r.ts.hour
+        if prev_hour != hour:
+            tag_list.append(r)
+            # print r
+            prev_hour = hour
+    return tag_list
+
+def fill_hourly():
+    tags = Tag.objects.filter(increasing=True).all()
+    for tag in tags:
+        data_records = data_sorted_records_m_h(current_tag=tag)
+        # print data_records
+        if data_records is None:
+            print "Tag={} data is empty".format(tag)
+            continue
+        if len(data_records)<2:
+            print "Tag={} data record less then 2!!! not enough to calc difference".format(tag)
+            continue
+        for i, d in enumerate(data_records):
+            if i == 0:
+                d_prev = d
+                continue
+            new_hourly = Hourly(tag=tag,
+                                start_data=d_prev,
+                                end_data=d,
+                                value=d.value-d_prev.value,
+                                ts=d.ts.replace(minute=0, second=0, microsecond=0))
+            print new_hourly
+            new_hourly.save()
+            d_prev = d
+
+
+
 if __name__ == '__main__':
+    fill_hourly()
     # recalc_tag_koef()
-    mer230_base_tags()
+    # mer230_base_tags()
