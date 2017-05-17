@@ -8,5 +8,7 @@ from . import views
 
 urlpatterns = [
     url(r'^$', views.index, name='index'),
-
+    url(r'^table/$', views.table, name='table'),
+    url(r'^bar_graph/$', views.bar_graph, name='bar_graph'),
+    url(r'^inst_graph/$', views.inst_graph, name='inst_graph'),
 ]

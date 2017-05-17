@@ -1,0 +1,17 @@
+{% extends 'web/base.html' %}
+
+{% block select_menu %}
+    <div class="checkbox">
+      <label><input type="checkbox" name="tag_value" value="1" {{ checked.tag_value.0 }}>Активная энергия</label>
+    </div>
+    <div class="checkbox">
+      <label><input type="checkbox" name="tag_value" value="2" {{ checked.tag_value.1 }}>Реактивная энергия</label>
+    </div>
+    <div class="checkbox">
+      <label><input type="checkbox" name="tag_value" value="3" {{ checked.tag_value.2 }}>Энергия по фазно</label>
+    </div>
+{% endblock %}
+
+{% block content %}
+    {{ html_table | safe}}
+{% endblock %}

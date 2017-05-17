@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{% block title %}диспетчеризация Нэфис{% endblock %}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+
+
+</head>
+<body>
+
+    <nav class="navbar navbar-inverse">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="true" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+            <a class="navbar-brand" href="{% url 'index' %}">Старт</a>
+            <a class="navbar-brand" href="{% url 'table' %}">Таблица</a>
+            <a class="navbar-brand" href="{% url 'bar_graph' %}">Диаграмма</a>
+            <a class="navbar-brand" href="{% url 'inst_graph' %}">График</a>
+
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+             <li><a href="#">Настройки</a></li>
+            <li><a href="#">Войти</a></li>
+          </ul>
+          <form class="navbar-form navbar-right">
+            <input type="text" class="form-control" placeholder="Поиск">
+          </form>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-10 main">
+          <h2 class="sub-header">Данные по объекту</h2>
+          <div class="row placeholders">
+          </div>
+              <div class="text-center">
+                  {% block content %}{% endblock %}
+              </div>
+
+{#          <h2 class="sub-header">Сообщения по объекту</h2>#}
+        </div>
+        <div class="col-sm-2 sidebar well" style="background-color:lightyellow;">
+          <h4>Выберите необходимые параметры:</h4>
+              <form>
+                  <div class="well well-sm">
+                      <p>Данные</p>
+                      {% block select_menu %}
+                      {% endblock %}
+                  </div>
+                  <div class="well well-sm">
+                      <p>Интервал времени:</p>
+                      <input data-toggle="tooltip" title="Начальная дата" type="date" name="day_begin" value="{{ date_value.0 }}">
+                      <input data-toggle="tooltip" title="Конечная дата" type="date" name="day_end" value="{{ date_value.1 }}">
+                  </div>
+                  <div class="well well-sm">
+                      <p>Тип:</p>
+                      <label class="radio-inline"><input type="radio" name="time_type" value="1" {{ checked.time_type.0 }}>Часовой</label>
+                      <label class="radio-inline"><input type="radio" name="time_type" value="2" {{ checked.time_type.1 }}>Суточный</label>
+                  </div>
+                  <div class="well well-sm">
+                      <label class="checkbox-inline"><input type="checkbox" name="graph_bar" value="1" {{ checked.graph_bar }}> График в столбец</label>
+                  </div>
+                  <div class="well well-sm">
+                      <label class="checkbox-inline"><input type="checkbox" name="koef" value="1" {{ checked.koef }}> Исп. коэф. трансформацмм </label>
+                  </div>
+                  <input class="center-block" type="submit" value="Построить" />
+              </form>
+
+          </div>
+      </div>
+    </div>
+        <br>
+        <br>
+    <footer class="navbar-inverse navbar-fixed-bottom text-center">
+      <p>«Все права защищены. ® spiderscada».</p>
+    </footer>
+
+    <script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+    </script>
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <!-- Just to make our placeholder images work. Don't actually copy the next line! -->
+    <script src="../../assets/js/vendor/holder.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+
+</html>

@@ -1,0 +1,13 @@
+{% extends 'web/base.html' %}
+
+{% block select_menu %}
+    <div class="radio">
+      <label><input type="radio" name="tag_value" value="1" {{ checked.tag_value.0 }}>Токи</label>
+    </div>
+    <div class="radio">
+      <label><input type="radio" name="tag_value" value="2" {{ checked.tag_value.1 }}>Напряжения</label>
+    </div>
+    <div class="radio">
+      <label><input type="radio" name="tag_value" value="3" {{ checked.tag_value.2 }}>Мощность</label>
+    </div>
+{% endblock %}
