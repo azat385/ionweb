@@ -30,17 +30,16 @@ def make_ch_list(list_ch, list_pos):
 
 def make_ch(list_ch, pos):
     pos -= 1
-    # print len(list_ch),pos
     pos = 0 if (pos < 0 or len(list_ch) <= pos) else pos
     result = list(list_ch)
     result[pos] = is_ch
     return result
 
 
-def date_range_check(date_value):
+def date_range_check(date_value, days_diff=1):
     date_value = [dateutil.parser.parse(d) for d in date_value]
     if date_value[0] >= date_value[1]:
-        date_value[0] = date_value[1] - timedelta(days=1)
+        date_value[0] = date_value[1] - timedelta(days=days_diff)
     return [t.date().isoformat() for t in date_value]
 
 
@@ -65,15 +64,15 @@ def selector_handler(params):
                   params.get('day_end', (date.today() + timedelta(days=1)).isoformat()),
                   ]
     date_value = date_range_check(date_value)
-
     return checked, date_value
+
 
 def index(request):
     return render(request, 'web/base.html', {})
 
 
-def table(request):
-    checked, date_value = selector_handler(request.GET)
+def get_data_records(checked, date_value_str_list):
+    # date_value = [dateutil.parser.parse(d) for d in date_value_str_list]
     tag_name_list = []
     indices = [i for i, x in enumerate(checked['tag_value']) if x == is_ch]
     if 0 in indices:
@@ -87,8 +86,15 @@ def table(request):
     # print tag_name_list
     tag_list = Tag.objects.filter(name__in=tag_name_list).all()
     # print tag_list
-    records = Hourly.objects.filter(tag__in=tag_list).all()
+    if checked['time_type'].index(is_ch)==1:
+        lookup_table = Daily
+    else:
+        lookup_table = Hourly
+    return lookup_table.objects.filter(tag__in=tag_list, ts__range=date_value_str_list).all()
 
+def table(request):
+    checked, date_value = selector_handler(request.GET)
+    records = get_data_records(checked=checked, date_value_str_list=date_value)
     df = pd.DataFrame(list(records.values()))
     df_pivot = df.pivot_table(index="ts", columns="tag_id", values="value",
                               aggfunc='sum', margins=True, margins_name='Sum')
@@ -100,7 +106,7 @@ def table(request):
     return render(request, 'web/table.html', {
         'checked': checked,
         'date_value': date_value,
-        'html_table': df_pivot.to_html()
+        'html_content': df_pivot.to_html()
     })
 
 
@@ -109,6 +115,7 @@ def bar_graph(request):
     return render(request, 'web/table.html', {
         'checked': checked,
         'date_value': date_value,
+        'html_content': None,
     })
 
 
