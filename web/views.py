@@ -13,8 +13,8 @@ import dateutil.parser
 from datetime import date, timedelta
 import pandas as pd
 
-# from plotly.offline import plot
-# from plotly.graph_objs import Bar, Scatter
+from plotly.offline import plot
+from plotly.graph_objs import Bar, Scatter
 
 
 is_ch = u'checked'
@@ -152,7 +152,34 @@ def bar_graph(request):
     if df is None:
         html_content = html_None
     else:
-        html_content = html_None
+        tag_id_list = df.tag_id.unique()
+        tag_id_list = tag_id_list.tolist()
+        tag_id_list = [int(i) for i in tag_id_list]
+        traces = []
+        for t_id in tag_id_list:
+            ts_value = df[df['tag_id'] == t_id][['ts', 'value']]
+            data_XY = ts_value.values.T.tolist()
+            t = Tag.objects.filter(id=t_id).all()[0]
+            t_name = t.name
+            tr = Bar(name=t_name,
+                     y=data_XY[1],
+                     x=data_XY[0],
+                     )
+            traces.append(tr)
+        data_plot = {
+            'data': traces,
+            'layout': {
+                'barmode': '',
+                'xaxis': {'title': 'Время'},
+                'yaxis': {'title': 'Энергия [Вт*ч]'},
+                'title': 'График потребления'
+            }}
+
+        if checked['graph_bar']:
+            data_plot['layout']['barmode'] = 'stack'
+
+        html_content = plot(data_plot, output_type='div', auto_open=False,
+                            show_link=False, include_plotlyjs=True)
     return render(request, 'web/table.html', {
         'checked': checked,
         'date_value': date_value,
