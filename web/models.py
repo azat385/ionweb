@@ -19,6 +19,7 @@ class Tag_group(models.Model):
     multiplier = models.FloatField(default=1)
     koef = models.FloatField(default=1)
     unit = models.CharField(max_length=10, null=True, blank=True)
+    unit_koef = models.CharField(max_length=10, null=True, blank=True)
 
 
 @python_2_unicode_compatible

@@ -47,9 +47,9 @@ class PageAdminTag(admin.ModelAdmin):
 
 class PageAdminTagGroup(admin.ModelAdmin):
     list_display = ('id', 'name', 'description_short', 'description_long', 'comment',
-                    'divider', 'multiplier', 'koef', 'unit')
+                    'divider', 'multiplier', 'koef', 'unit', 'unit_koef')
     list_editable = ('name', 'description_short', 'description_long', 'comment',
-                     'divider', 'multiplier', 'koef', 'unit')
+                     'divider', 'multiplier', 'koef', 'unit', 'unit_koef')
     list_display_links = ('id',)
     list_per_page = 50
     ordering = ('id',)
