@@ -105,6 +105,8 @@ def get_data_records(checked, date_value_str_list):
         df = pd.DataFrame(l)
         # df.loc[:, 'value'] = df['value'] * k
         df.loc[:, 'value'] *= k
+        df.loc[:, 'ts'] = df['ts'].dt.tz_convert('Europe/Moscow')
+        df.loc[:, 'ts'] = df['ts'].dt.strftime('%Y-%m-%d %H:%M')
         return df
 
 
@@ -189,7 +191,12 @@ def bar_graph(request):
 
 def inst_graph(request):
     checked, date_value = selector_handler(request.GET)
+    df = get_data_records(checked=checked, date_value_str_list=date_value)
+
+
+    html_content = html_None
     return render(request, 'web/inst.html', {
         'checked': checked,
         'date_value': date_value,
+        'html_content': html_content,
     })

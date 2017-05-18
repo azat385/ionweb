@@ -11,3 +11,7 @@
       <label><input type="radio" name="tag_value" value="3" {{ checked.tag_value.2 }}>Мощность</label>
     </div>
 {% endblock %}
+
+{% block content %}
+    {{ html_content | safe}}
+{% endblock %}
