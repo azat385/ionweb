@@ -241,7 +241,9 @@ def inst_graph(request):
             'data': traces,
             'layout': {
                 'barmode': '',
-                'xaxis': {'title': 'Время'},
+                'xaxis': {'title': 'Время',
+                          # 'range': ['2017-05-18', '2017-05-19'],
+                          },
                 'yaxis': {'title': 'Энергия [Вт*ч]'},
                 'title': 'График потребления',
                 'height': 720,
