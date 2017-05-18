@@ -99,7 +99,7 @@ def get_inst_tag_list(checked):
 
 
 def get_data_records(checked, date_value_str_list, tag_list, lookup_table):
-    records = lookup_table.objects.filter(tag__in=tag_list, ts__range=date_value_str_list).all()
+    records = lookup_table.objects.filter(tag__in=tag_list, ts__range=date_value_str_list).order_by('ts').all()
     l = list(records.values())
     if len(l) < 1 :
         return None
@@ -195,7 +195,7 @@ def bar_graph(request):
                 'barmode': '',
                 'xaxis': {'title': 'Время'},
                 'yaxis': {'title': 'Энергия [Вт*ч]'},
-                'title': 'График потребления'
+                'title': 'График потребления',
             }}
 
         if checked['graph_bar']:
@@ -231,9 +231,11 @@ def inst_graph(request):
             t = Tag.objects.filter(id=t_id).all()[0]
             t_name = t.name
             tr = Scatter(name=t_name,
-                     y=data_XY[1],
-                     x=data_XY[0],
-                     )
+                         y=data_XY[1],
+                         x=data_XY[0],
+                         # mode = 'lines+markers',
+                         # connectgaps=False,
+                         )
             traces.append(tr)
         data_plot = {
             'data': traces,
@@ -241,7 +243,8 @@ def inst_graph(request):
                 'barmode': '',
                 'xaxis': {'title': 'Время'},
                 'yaxis': {'title': 'Энергия [Вт*ч]'},
-                'title': 'График потребления'
+                'title': 'График потребления',
+                'height': 720,
             }}
 
         if checked['graph_bar']:
