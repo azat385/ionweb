@@ -72,8 +72,7 @@ def index(request):
     return render(request, 'web/base.html', {})
 
 
-def get_data_records(checked, date_value_str_list):
-    # date_value = [dateutil.parser.parse(d) for d in date_value_str_list]
+def get_tag_list(checked):
     tag_name_list = []
     indices = [i for i, x in enumerate(checked['tag_value']) if x == is_ch]
     if 0 in indices:
@@ -84,24 +83,35 @@ def get_data_records(checked, date_value_str_list):
         tag_name_list.append('Ts_phaseA')
         tag_name_list.append('Ts_phaseB')
         tag_name_list.append('Ts_phaseC')
-    # print tag_name_list
-    tag_list = Tag.objects.filter(name__in=tag_name_list).all()
-    # print tag_list
-    if checked['time_type'].index(is_ch)==1:
-        lookup_table = Daily
-    else:
-        lookup_table = Hourly
+    return Tag.objects.filter(name__in=tag_name_list).all()
+
+
+def get_inst_tag_list(checked):
+    pos_selected = checked['tag_value'].index(is_ch)
+    gr_name = 'power'
+    if pos_selected == 0:
+        gr_name = 'current'
+    if pos_selected == 1:
+        gr_name = 'voltage'
+    if pos_selected == 2:
+        gr_name = 'power'
+    return Tag.objects.filter(group__name=gr_name).all()
+
+
+def get_data_records(checked, date_value_str_list, tag_list, lookup_table):
     records = lookup_table.objects.filter(tag__in=tag_list, ts__range=date_value_str_list).all()
     l = list(records.values())
     if len(l) < 1 :
         return None
     else:
+        print 'checked: koef:',checked['koef']
         if checked['koef']:
             t = tag_list[0]
             gr = t.group
             k = gr.koef
         else:
             k = 1
+        print "k =",k
         df = pd.DataFrame(l)
         # df.loc[:, 'value'] = df['value'] * k
         df.loc[:, 'value'] *= k
@@ -125,7 +135,13 @@ def table_header(id_list, checked):
 
 def table(request):
     checked, date_value = selector_handler(request.GET)
-    df = get_data_records(checked=checked, date_value_str_list=date_value)
+    tag_list = get_tag_list(checked)
+    if checked['time_type'].index(is_ch)==1:
+        lookup_table = Daily
+    else:
+        lookup_table = Hourly
+    df = get_data_records(checked=checked, date_value_str_list=date_value,
+                          tag_list=tag_list, lookup_table=lookup_table)
 
     if df is None:
         html_content = html_None
@@ -149,8 +165,13 @@ def table(request):
 
 def bar_graph(request):
     checked, date_value = selector_handler(request.GET)
-    df = get_data_records(checked=checked, date_value_str_list=date_value)
-
+    tag_list = get_tag_list(checked)
+    if checked['time_type'].index(is_ch)==1:
+        lookup_table = Daily
+    else:
+        lookup_table = Hourly
+    df = get_data_records(checked=checked, date_value_str_list=date_value,
+                          tag_list=tag_list, lookup_table=lookup_table)
     if df is None:
         html_content = html_None
     else:
@@ -180,6 +201,9 @@ def bar_graph(request):
         if checked['graph_bar']:
             data_plot['layout']['barmode'] = 'stack'
 
+        if checked['koef']:
+            data_plot['layout']['yaxis'] = {'title': 'Энергия [кВт*ч]'}
+
         html_content = plot(data_plot, output_type='div', auto_open=False,
                             show_link=False, include_plotlyjs=True)
     return render(request, 'web/table.html', {
@@ -191,10 +215,40 @@ def bar_graph(request):
 
 def inst_graph(request):
     checked, date_value = selector_handler(request.GET)
-    df = get_data_records(checked=checked, date_value_str_list=date_value)
+    tag_list = get_inst_tag_list(checked)
+    df = get_data_records(checked=checked, date_value_str_list=date_value,
+                          tag_list=tag_list, lookup_table=Data)
+    if df is None:
+        html_content = html_None
+    else:
+        tag_id_list = df.tag_id.unique()
+        tag_id_list = tag_id_list.tolist()
+        tag_id_list = [int(i) for i in tag_id_list]
+        traces = []
+        for t_id in tag_id_list:
+            ts_value = df[df['tag_id'] == t_id][['ts', 'value']]
+            data_XY = ts_value.values.T.tolist()
+            t = Tag.objects.filter(id=t_id).all()[0]
+            t_name = t.name
+            tr = Scatter(name=t_name,
+                     y=data_XY[1],
+                     x=data_XY[0],
+                     )
+            traces.append(tr)
+        data_plot = {
+            'data': traces,
+            'layout': {
+                'barmode': '',
+                'xaxis': {'title': 'Время'},
+                'yaxis': {'title': 'Энергия [Вт*ч]'},
+                'title': 'График потребления'
+            }}
 
+        if checked['graph_bar']:
+            data_plot['layout']['barmode'] = 'stack'
 
-    html_content = html_None
+        html_content = plot(data_plot, output_type='div', auto_open=False,
+                            show_link=False, include_plotlyjs=True)
     return render(request, 'web/inst.html', {
         'checked': checked,
         'date_value': date_value,

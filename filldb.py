@@ -24,7 +24,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ionweb.settings')
 django.setup()
 
 
-from web.models import Tag, Tag_group, Hourly, Data
+from web.models import Tag, Tag_group, Hourly, Daily, Data
 from datetime import datetime
 
 def recalc_tag_koef():
@@ -119,7 +119,49 @@ def fill_hourly():
     logger.debug('End adding hourly table...')
 
 
+def hourly_sorted_records_m_h(current_tag):
+    last_record_daily = Daily.objects.filter(tag=current_tag).order_by('-id').first()
+    if last_record_daily is None:
+        last_record_hourly_stime = datetime(2017, 1, 1, tzinfo=None)
+        logger.debug("No last date in hourly table. The default is used")
+    else:
+        last_record_hourly_stime = last_record_daily.ts
+    hourly_records = Hourly.objects.filter(ts__gte=last_record_hourly_stime).filter(
+                                       tag=current_tag).filter(ts__hour=0).all()
+    return hourly_records
+
+
+def fill_daily():
+    logger.debug('Start adding daily table....')
+    tags = Tag.objects.filter(increasing=True).all()
+    added_rows = 0
+    for tag in tags:
+        data_records = hourly_sorted_records_m_h(current_tag=tag)
+        if data_records is None:
+            logger.debug("Tag={} hourly is empty".format(tag))
+            continue
+        if len(data_records)<2:
+            logger.debug("Tag={} hourly record less then 2!!! not enough to calc difference".format(tag))
+            continue
+        for i, d in enumerate(data_records):
+            if i == 0:
+                d_prev = d
+                continue
+            new_daily = Daily(tag=tag,
+                              start_data=d_prev.start_data,
+                              end_data=d.start_data,
+                              value=d.start_data.value-d_prev.start_data.value,
+                              ts=d.ts.replace(minute=0, second=0, microsecond=0))
+            logger.debug(new_daily)
+            new_daily.save()
+            added_rows += 1
+            d_prev = d
+    logger.info('Totaly added rows: {}'.format(added_rows))
+    logger.debug('End adding daily table...')
+
+
 if __name__ == '__main__':
     fill_hourly()
+    # fill_daily()
     # recalc_tag_koef()
     # mer230_base_tags()

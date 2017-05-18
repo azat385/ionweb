@@ -71,4 +71,5 @@ class Daily(models.Model):
     ts = models.DateTimeField()
 
     def __str__(self):
-        return self.tag
+        return "Daily: id={} tag={} value={} ts={} start_d={} end_d={}".format(
+            self.id, self.tag, self.value, self.ts, self.start_data, self.end_data)
