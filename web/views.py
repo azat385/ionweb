@@ -167,12 +167,12 @@ def table(request):
         'checked': checked,
         'date_value': date_value,
         'html_content': html_content,
+        'show_well': [1, 1, 1, 0, 1],
     })
 
 
 def bar_graph(request):
     checked, date_value = selector_handler(request.GET)
-
     tag_list = get_tag_list(checked)
     if checked['time_type'].index(is_ch) == 1:
         lookup_table = Daily
@@ -220,6 +220,7 @@ def bar_graph(request):
         'checked': checked,
         'date_value': date_value,
         'html_content': html_content,
+        'show_well': [1, 1, 1, 1, 1],
     })
 
 
@@ -269,4 +270,5 @@ def inst_graph(request):
         'checked': checked,
         'date_value': date_value,
         'html_content': html_content,
+        'show_well': [1, 1, 0, 0, 1],
     })
