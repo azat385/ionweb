@@ -37,10 +37,15 @@ def make_ch(list_ch, pos):
     return result
 
 
-def date_range_check(date_value, days_diff=1):
+def date_range_check(date_value, days_diff_min=1, days_diff_max=40):
     date_value = [dateutil.parser.parse(d) for d in date_value]
-    if date_value[0] >= date_value[1]:
-        date_value[0] = date_value[1] - timedelta(days=days_diff)
+    #min
+    if (date_value[1] - date_value[0]) < timedelta(days=days_diff_min):
+        date_value[0] = date_value[1] - timedelta(days=days_diff_min)
+    #max
+    if (date_value[1] - date_value[0]) > timedelta(days=days_diff_max):
+        date_value[0] = date_value[1] - timedelta(days=days_diff_max)
+
     return [t.date().isoformat() for t in date_value]
 
 
@@ -64,7 +69,7 @@ def selector_handler(params):
     date_value = [params.get('day_begin', date.today().isoformat()),
                   params.get('day_end', (date.today() + timedelta(days=1)).isoformat()),
                   ]
-    date_value = date_range_check(date_value)
+    # date_value = date_range_check(date_value)
     return checked, date_value
 
 
@@ -136,10 +141,12 @@ def table_header(id_list, checked):
 def table(request):
     checked, date_value = selector_handler(request.GET)
     tag_list = get_tag_list(checked)
-    if checked['time_type'].index(is_ch)==1:
+    if checked['time_type'].index(is_ch) == 1:
         lookup_table = Daily
+        date_value = date_range_check(date_value, 2, 66)
     else:
         lookup_table = Hourly
+        date_value = date_range_check(date_value, 1, 3)
     df = get_data_records(checked=checked, date_value_str_list=date_value,
                           tag_list=tag_list, lookup_table=lookup_table)
 
@@ -165,11 +172,14 @@ def table(request):
 
 def bar_graph(request):
     checked, date_value = selector_handler(request.GET)
+
     tag_list = get_tag_list(checked)
-    if checked['time_type'].index(is_ch)==1:
+    if checked['time_type'].index(is_ch) == 1:
         lookup_table = Daily
+        date_value = date_range_check(date_value, 2, 66)
     else:
         lookup_table = Hourly
+        date_value = date_range_check(date_value, 1, 3)
     df = get_data_records(checked=checked, date_value_str_list=date_value,
                           tag_list=tag_list, lookup_table=lookup_table)
     if df is None:
@@ -215,6 +225,7 @@ def bar_graph(request):
 
 def inst_graph(request):
     checked, date_value = selector_handler(request.GET)
+    date_value = date_range_check(date_value, 1, 3)
     tag_list = get_inst_tag_list(checked)
     df = get_data_records(checked=checked, date_value_str_list=date_value,
                           tag_list=tag_list, lookup_table=Data)
