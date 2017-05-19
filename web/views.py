@@ -138,6 +138,7 @@ def table_header(id_list, checked):
     return result
 
 
+@login_required()
 def table(request):
     checked, date_value = selector_handler(request.GET)
     tag_list = get_tag_list(checked)
@@ -171,6 +172,7 @@ def table(request):
     })
 
 
+@login_required()
 def bar_graph(request):
     checked, date_value = selector_handler(request.GET)
     tag_list = get_tag_list(checked)
@@ -224,6 +226,7 @@ def bar_graph(request):
     })
 
 
+@login_required()
 def inst_graph(request):
     checked, date_value = selector_handler(request.GET)
     date_value = date_range_check(date_value, 1, 3)
@@ -272,3 +275,10 @@ def inst_graph(request):
         'html_content': html_content,
         'show_well': [1, 1, 0, 0, 1],
     })
+
+
+# from django.contrib.auth import logout
+#
+#
+# def logout_view(request):
+#     logout(request)

@@ -30,8 +30,14 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
-             <li><a href="#">Настройки</a></li>
-            <li><a href="#">Войти</a></li>
+             <li><a href="/admin/">Настройки</a></li>
+            {% if user.is_authenticated %}
+{#                {% trans 'Welcome,' %}#}
+{#                <p>{% firstof user.get_short_name user.get_username %}</p>.#}
+                <li><a href="{% url 'logout' %}">Выйти [{% firstof user.get_username %}]</a></li>
+            {% else %}
+                <li><a href="{% url 'login' %}">Войти</a></li>
+            {% endif %}
           </ul>
           <form class="navbar-form navbar-right">
             <input type="text" class="form-control" placeholder="Поиск">
