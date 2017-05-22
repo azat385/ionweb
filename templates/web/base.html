@@ -46,58 +46,9 @@
       </div>
     </nav>
 
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-sm-10 main">
-          <h2 class="sub-header">Данные по объекту</h2>
-          <div class="row placeholders">
-          </div>
-              <div class="text-center">
-                  {% block content %}{% endblock %}
-              </div>
+    {% block content %}
 
-{#          <h2 class="sub-header">Сообщения по объекту</h2>#}
-        </div>
-        <div class="col-sm-2 sidebar well" style="background-color:lightyellow;">
-          <h4>Выберите необходимые параметры:</h4>
-              <form>
-                {% if show_well.0 %}
-                  <div class="well well-sm">
-                      <p>Данные</p>
-                      {% block select_menu %}
-                      {% endblock %}
-                  </div>
-                {% endif %}
-                {% if show_well.1 %}
-                  <div class="well well-sm">
-                      <p>Интервал времени:</p>
-                      <input data-toggle="tooltip" title="Начальная дата" type="date" name="day_begin" value="{{ date_value.0 }}">
-                      <input data-toggle="tooltip" title="Конечная дата" type="date" name="day_end" value="{{ date_value.1 }}">
-                  </div>
-                {% endif %}
-                {% if show_well.2 %}
-                  <div class="well well-sm">
-                      <p>Тип:</p>
-                      <label class="radio-inline"><input type="radio" name="time_type" value="1" {{ checked.time_type.0 }}>Часовой</label>
-                      <label class="radio-inline"><input type="radio" name="time_type" value="2" {{ checked.time_type.1 }}>Суточный</label>
-                  </div>
-                {% endif %}
-                {% if show_well.3 %}
-                  <div class="well well-sm">
-                      <label class="checkbox-inline"><input type="checkbox" name="graph_bar" value="1" {{ checked.graph_bar }}> График в столбец</label>
-                  </div>
-                {% endif %}
-                {% if show_well.4 %}
-                  <div class="well well-sm">
-                      <label class="checkbox-inline"><input type="checkbox" name="koef" value="1" {{ checked.koef }}> Исп. коэф. трансформации </label>
-                  </div>
-                {% endif %}
-                  <input class="center-block" type="submit" value="Построить" />
-              </form>
-
-          </div>
-      </div>
-    </div>
+    {% endblock %}
         <br>
         <br>
     <footer class="navbar-inverse navbar-fixed-bottom text-center">

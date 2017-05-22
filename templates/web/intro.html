@@ -1,0 +1,30 @@
+{% extends "web/base.html" %}
+{% load web_extras %}
+{% load humanize %}
+
+{% block content %}
+     <h2 class="sub-header">Последние данные</h2>
+<div>
+    <table class="table table-hover">
+        <thead>
+            <tr>    <th>Номер</th>
+                    <th>Название</th>
+                    <th>Описание</th>
+                    <th>Значение</th>
+                    <th>Дата и время</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for d in last_data %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ d.tag }}</td>
+                    <td>{{ d.tag.description_long }}</td>
+                    <td>{{ d.value|multiply:d.tag.group.koef | intcomma }} {{ d.tag.group.unit_koef }}</td>
+                    <td>{{ d.ts }} ({{ d.ts | naturaltime }})</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

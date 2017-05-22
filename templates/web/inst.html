@@ -1,4 +1,4 @@
-{% extends 'web/base.html' %}
+{% extends 'web/base_selector.html' %}
 
 {% block select_menu %}
     <div class="radio">
@@ -12,6 +12,6 @@
     </div>
 {% endblock %}
 
-{% block content %}
+{% block data_html %}
     {{ html_content | safe}}
 {% endblock %}

@@ -73,8 +73,24 @@ def selector_handler(params):
     return checked, date_value
 
 
+from django_tables2 import RequestConfig
+from .tables import DataTable
+
+
+def test_view(request):
+    data = Data.objects.filter(tag__show=True).order_by('tag', '-ts').distinct('tag')
+    table_data = DataTable(data)
+    RequestConfig(request).configure(table_data)
+    return render(request, 'web/test.html', {'last_data': table_data})
+
+
 def index(request):
-    return render(request, 'web/base.html', {})
+    # tags = Tag.objects.filter(show=True).order_by('id')
+    # data = []
+    # for t in tags:
+    #     data.append(Data.objects.filter(tag=t).last())
+    data = Data.objects.filter(tag__show=True).order_by('tag_id', '-ts').distinct('tag_id')
+    return render(request, 'web/intro.html', {'last_data': data})
 
 
 def get_tag_list(checked):
