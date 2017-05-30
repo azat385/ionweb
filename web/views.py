@@ -89,7 +89,8 @@ def index(request):
     # data = []
     # for t in tags:
     #     data.append(Data.objects.filter(tag=t).last())
-    data = Data.objects.filter(tag__show=True).order_by('tag_id', '-ts').distinct('tag_id')
+    latest_id = Data.objects.latest('id').id
+    data = Data.objects.filter(tag__show=True, id__gt=latest_id-100).order_by('tag_id', '-ts').distinct('tag_id')
     return render(request, 'web/intro.html', {'last_data': data})
 
 
