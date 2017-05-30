@@ -107,13 +107,11 @@ def fill_hourly():
             if i == 0:
                 d_prev = d
                 continue
-            new_ts = d.ts.replace(minute=0, second=0, microsecond=0)
-            new_ts = new_ts - timedelta(hours=12)
             new_hourly = Hourly(tag=tag,
                                 start_data=d_prev,
                                 end_data=d,
                                 value=d.value-d_prev.value,
-                                ts=new_ts
+                                ts=d.ts.replace(minute=0, second=0, microsecond=0),
                                 )
             logger.debug(new_hourly)
             new_hourly.save()
@@ -151,11 +149,14 @@ def fill_daily():
             if i == 0:
                 d_prev = d
                 continue
+            new_ts = d.ts.replace(minute=0, second=0, microsecond=0)
+            new_ts = new_ts - timedelta(hours=12)
             new_daily = Daily(tag=tag,
                               start_data=d_prev.start_data,
                               end_data=d.start_data,
                               value=d.start_data.value-d_prev.start_data.value,
-                              ts=d_prev.ts.replace(minute=0, second=0, microsecond=0))
+                              ts=new_ts,
+                              )
             logger.debug(new_daily)
             new_daily.save()
             added_rows += 1
