@@ -25,7 +25,7 @@ django.setup()
 
 
 from web.models import Tag, Tag_group, Hourly, Daily, Data
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 def recalc_tag_koef():
@@ -80,7 +80,7 @@ def data_sorted_records_m_h(current_tag):
     else:
         last_record_hourly_stime = last_record_hourly.ts
     data_records = Data.objects.filter(ts__gt=last_record_hourly_stime).filter(
-                                       tag=current_tag).filter(ts__minute__lt=2).all()
+                                       tag=current_tag).filter(ts__minute__lt=2).order_by('ts').all()
     prev_hour = 66
     tag_list = []
     for r in data_records:
@@ -107,11 +107,14 @@ def fill_hourly():
             if i == 0:
                 d_prev = d
                 continue
+            new_ts = d.ts.replace(minute=0, second=0, microsecond=0)
+            new_ts = new_ts - timedelta(hours=12)
             new_hourly = Hourly(tag=tag,
                                 start_data=d_prev,
                                 end_data=d,
                                 value=d.value-d_prev.value,
-                                ts=d_prev.ts.replace(minute=0, second=0, microsecond=0))
+                                ts=new_ts
+                                )
             logger.debug(new_hourly)
             new_hourly.save()
             added_rows += 1
@@ -128,7 +131,7 @@ def hourly_sorted_records_m_h(current_tag):
     else:
         last_record_hourly_stime = last_record_daily.ts
     hourly_records = Hourly.objects.filter(ts__gte=last_record_hourly_stime).filter(
-                                       tag=current_tag).filter(ts__hour=0).all()
+                                       tag=current_tag).filter(ts__hour=0).order_by('ts').all()
     return hourly_records
 
 
