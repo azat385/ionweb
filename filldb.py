@@ -27,6 +27,7 @@ django.setup()
 from web.models import Tag, Tag_group, Hourly, Daily, Data
 from datetime import datetime
 
+
 def recalc_tag_koef():
     all_tag = Tag_group.objects.all()
 
@@ -110,7 +111,7 @@ def fill_hourly():
                                 start_data=d_prev,
                                 end_data=d,
                                 value=d.value-d_prev.value,
-                                ts=d.ts.replace(minute=0, second=0, microsecond=0))
+                                ts=d_prev.ts.replace(minute=0, second=0, microsecond=0))
             logger.debug(new_hourly)
             new_hourly.save()
             added_rows += 1
@@ -151,7 +152,7 @@ def fill_daily():
                               start_data=d_prev.start_data,
                               end_data=d.start_data,
                               value=d.start_data.value-d_prev.start_data.value,
-                              ts=d.ts.replace(minute=0, second=0, microsecond=0))
+                              ts=d_prev.ts.replace(minute=0, second=0, microsecond=0))
             logger.debug(new_daily)
             new_daily.save()
             added_rows += 1
