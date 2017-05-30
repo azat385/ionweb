@@ -150,7 +150,7 @@ def fill_daily():
                 d_prev = d
                 continue
             new_ts = d.ts.replace(minute=0, second=0, microsecond=0)
-            new_ts = new_ts - timedelta(hours=12)
+            new_ts = new_ts - timedelta(minutes=1)  # lets try 1min back!
             new_daily = Daily(tag=tag,
                               start_data=d_prev.start_data,
                               end_data=d.start_data,
