@@ -7,7 +7,7 @@ from django.shortcuts import render, get_object_or_404
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
 
-from .models import Data, Tag, Tag_group, Hourly, Daily
+from .models import Data, Tag, Tag_group, Hourly, Daily, Config
 
 import dateutil.parser
 from datetime import date, timedelta
@@ -119,23 +119,26 @@ def get_inst_tag_list(checked):
     return Tag.objects.filter(group__name=gr_name).all()
 
 
-def get_data_records(checked, date_value_str_list, tag_list, lookup_table):
+def get_data_records(checked, date_value_str_list, tag_list, lookup_table, minus_minutes=0):
     records = lookup_table.objects.filter(tag__in=tag_list, ts__range=date_value_str_list).order_by('ts').all()
     l = list(records.values())
-    if len(l) < 1 :
+    if len(l) < 1:
         return None
     else:
-        print 'checked: koef:',checked['koef']
+        # print 'checked: koef:', checked['koef']
         if checked['koef']:
             t = tag_list[0]
             gr = t.group
             k = gr.koef
         else:
             k = 1
-        print "k =",k
+        # print "k =",k
         df = pd.DataFrame(l)
         # df.loc[:, 'value'] = df['value'] * k
-        df.loc[:, 'value'] *= k
+        if k != 1:
+            df.loc[:, 'value'] *= k
+        if minus_minutes > 0:
+            df.loc[:, 'ts'] -= timedelta(minutes=minus_minutes)
         df.loc[:, 'ts'] = df['ts'].dt.tz_convert('Europe/Moscow')
         df.loc[:, 'ts'] = df['ts'].dt.strftime('%Y-%m-%d %H:%M')
         return df
@@ -160,12 +163,20 @@ def table(request):
     tag_list = get_tag_list(checked)
     if checked['time_type'].index(is_ch) == 1:
         lookup_table = Daily
-        date_value = date_range_check(date_value, 2, 66)
+        date_value = date_range_check(date_value, 2, 99)
+        ts_offset_hour = Config.objects.filter(name='ts_offset_hour')
+        if ts_offset_hour.exists():
+            ts_offset = ts_offset_hour.get().actual_value()
+        else:
+            ts_offset = 0
     else:
         lookup_table = Hourly
-        date_value = date_range_check(date_value, 1, 3)
+        date_value = date_range_check(date_value, 1, 7)
+        ts_offset = 0
     df = get_data_records(checked=checked, date_value_str_list=date_value,
-                          tag_list=tag_list, lookup_table=lookup_table)
+                          tag_list=tag_list, lookup_table=lookup_table,
+                          minus_minutes=ts_offset,
+                          )
 
     if df is None:
         html_content = html_None
@@ -194,12 +205,20 @@ def bar_graph(request):
     tag_list = get_tag_list(checked)
     if checked['time_type'].index(is_ch) == 1:
         lookup_table = Daily
-        date_value = date_range_check(date_value, 2, 66)
+        date_value = date_range_check(date_value, 2, 99)
+        ts_offset_hour = Config.objects.filter(name='ts_offset_hour')
+        if ts_offset_hour.exists():
+            ts_offset = ts_offset_hour.get().actual_value()
+        else:
+            ts_offset = 0
     else:
         lookup_table = Hourly
-        date_value = date_range_check(date_value, 1, 3)
+        date_value = date_range_check(date_value, 1, 7)
+        ts_offset = 0
     df = get_data_records(checked=checked, date_value_str_list=date_value,
-                          tag_list=tag_list, lookup_table=lookup_table)
+                          tag_list=tag_list, lookup_table=lookup_table,
+                          minus_minutes=ts_offset,
+                          )
     if df is None:
         html_content = html_None
     else:
@@ -291,6 +310,26 @@ def inst_graph(request):
         'html_content': html_content,
         'show_well': [1, 1, 0, 0, 1],
     })
+
+
+from forms import SelectorForm, PeriodFilter
+
+def form_test_view(request):
+    # form = PeriodFilter(initial={'range': (date.today(), date.today())})
+    # (from_date, to_date) = form.cleaned_data['range']
+    return render(request, 'web/base_form_test.html')
+
+def form_view(request):
+    # the_initails = {'your_name': u'Ваше Имя', 'time_type': 2, 'int_value': 66}
+    if len(request.GET):
+        selector_form = SelectorForm(data=request.GET)
+    else:
+        # selector_form = SelectorForm(initial=the_initails)
+        selector_form = SelectorForm()
+    selector_form.is_valid()
+    return render(request, 'web/base_form.html', {'form': selector_form})
+
+
 
 
 # from django.contrib.auth import logout

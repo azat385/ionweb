@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from .models import Tag, Tag_group, Hourly
+from .models import Tag, Tag_group, Hourly, Config
 
 from django.contrib import admin
 
@@ -55,8 +55,16 @@ class PageAdminTagGroup(admin.ModelAdmin):
     ordering = ('id',)
 
 
+class PageAdminSetting(admin.ModelAdmin):
+    list_display = ('id', 'name', 'value', 'value_type',)
+    list_display_links = ('id',)
+    list_per_page = 50
+    ordering = ('id',)
+
+
 admin.site.register(Tag, PageAdminTag)
 admin.site.register(Tag_group, PageAdminTagGroup)
 admin.site.register(Hourly, PageAdminHourly)
+admin.site.register(Config, PageAdminSetting)
 
 # Register your models here.

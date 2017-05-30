@@ -40,6 +40,7 @@ INSTALLED_APPS = (
     'web',
     'django_tables2',
     'django.contrib.humanize',
+    # 'django_bootstrap3_daterangepicker',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -118,3 +119,6 @@ LOGOUT_REDIRECT_URL = '/'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # export DJANGO_SETTINGS_MODULE=dj.settings
+
+
+# DATE_FORMAT = "Y-m-d"

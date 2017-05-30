@@ -12,5 +12,7 @@ urlpatterns = [
     url(r'^bar_graph/$', views.bar_graph, name='bar_graph'),
     url(r'^inst_graph/$', views.inst_graph, name='inst_graph'),
     url(r'^test/$', views.test_view, name='test'),
+    url(r'^form/$', views.form_view, name='form'),
+    url(r'^form_test/$', views.form_test_view, name='form_test'),
     # url(r'^accounts/logout/$', views.logout_view(), name='logout'),
 ]
