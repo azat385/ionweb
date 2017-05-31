@@ -190,7 +190,8 @@ def table(request):
         # BETTER WAY: send tag list to template!!!!
         df_pivot.columns = table_header(col_names, checked) + ['Сумма']
         print df_pivot.columns
-        html_content = df_pivot.to_html()
+        html_content = df_pivot.to_html(border=1, justify='center')
+        html_content = html_content.replace('dataframe', 'table table-hover')
 
     return render(request, 'web/table.html', {
         'checked': checked,
