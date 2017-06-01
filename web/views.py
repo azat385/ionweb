@@ -91,7 +91,61 @@ def index(request):
     #     data.append(Data.objects.filter(tag=t).last())
     latest_id = Data.objects.latest('id').id
     data = Data.objects.filter(tag__show=True, id__gt=latest_id-100).order_by('tag_id', '-ts').distinct('tag_id')
-    return render(request, 'web/intro.html', {'last_data': data})
+
+    labels = [
+        "Ts_phaseA",
+        "Ts_phaseB",
+        "Ts_phaseC",
+    ]
+
+    fig = {
+        "data": [
+            {
+                "values": [16, 15, 12, ],
+                "labels": labels,
+                "domain": {"y": [0, .48]},
+                "name": "кВт",
+                "hoverinfo": "label+name",
+                "hole": .4,
+                "type": "pie"
+            },
+            {
+                "values": [27, 11, 25, ],
+                "labels": labels,
+                "domain": {"y": [.52, 1]},
+                "name": "кВт",
+                "hoverinfo": "label+name",
+                "hole": .4,
+                "type": "pie"
+            }],
+        "layout": {
+            "title": "Потребление энергии",
+            "annotations": [
+                {
+                    "font": {
+                        "size": 14
+                    },
+                    "showarrow": False,
+                    "text": "Вчера",
+                    "x": 0.5,
+                    "y": 0.2
+                },
+                {
+                    "font": {
+                        "size": 14
+                    },
+                    "showarrow": False,
+                    "text": "Сегодня",
+                    "x": 0.5,
+                    "y": 0.8
+                }
+            ]
+        }
+    }
+    pie_plot = plot(fig, output_type='div', auto_open=False,
+                        show_link=False, include_plotlyjs=True)
+
+    return render(request, 'web/intro.html', {'last_data': data, 'pie_plot': pie_plot})
 
 
 def get_tag_list(checked):
