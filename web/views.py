@@ -148,7 +148,17 @@ def index(request):
     pie_plot = plot(fig, output_type='div', auto_open=False,
                         show_link=False, include_plotlyjs=True)
 
-    return render(request, 'web/intro.html', {'last_data': data, 'pie_plot': pie_plot})
+    intro_use_koef = Config.objects.filter(name='intro_use_koef')
+    if intro_use_koef.exists():
+        intro_use_koef = intro_use_koef.first().actual_value()
+    else:
+        intro_use_koef = True
+
+    return render(request, 'web/intro.html', {'last_data': data,
+                                              'use_koef': intro_use_koef ,
+                                              'pie_plot': pie_plot
+                                              }
+                  )
 
 
 def get_tag_list(checked):

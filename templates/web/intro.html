@@ -26,7 +26,12 @@
                                 <td>{{ forloop.counter }}</td>
                                 <td>{{ d.tag }}</td>
                                 <td>{{ d.tag.description_long }}</td>
-                                <td>{{ d.value|multiply:d.tag.group.koef | intcomma }} {{ d.tag.group.unit_koef }}</td>
+                                <td>{% if  use_koef %}
+                                        {{ d.value|multiply:d.tag.group.koef | intcomma }} {{ d.tag.group.unit_koef }}
+                                    {% else %}
+                                        {{ d.value|divide:d.tag.group.divider | intcomma }} {{ d.tag.group.unit }}
+                                    {% endif %}
+                                    </td>
                                 <td>{{ d.ts }} ({{ d.ts | naturaltime }})</td>
                             </tr>
                         {% endfor %}
