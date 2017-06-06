@@ -97,24 +97,27 @@ def index(request):
         "Ts_phaseB",
         "Ts_phaseC",
     ]
-
+    latest_Ts_ABC = data.filter(tag__name__in=labels).all()
+    #latest_Ts_ABC.values_list('tag__name', 'value', )
+    #<QuerySet [(u'Ts_phaseA', 75539.0), (u'Ts_phaseB', 57206.0), (u'Ts_phaseC', 88089.0)]>
+    vs = [i.value for i in latest_Ts_ABC]
     fig = {
         "data": [
             {
-                "values": [16, 15, 12, ],
+                "values": vs,
                 "labels": labels,
                 "domain": {"y": [0, .48]},
                 "name": "кВт",
-                "hoverinfo": "label+name",
+                "hoverinfo": "label",
                 "hole": .4,
                 "type": "pie"
             },
             {
-                "values": [27, 11, 25, ],
+                "values": vs,
                 "labels": labels,
                 "domain": {"y": [.52, 1]},
                 "name": "кВт",
-                "hoverinfo": "label+name",
+                "hoverinfo": "label",
                 "hole": .4,
                 "type": "pie"
             }],
