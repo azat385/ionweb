@@ -4,8 +4,8 @@ from __future__ import unicode_literals
 from datetime import datetime, date
 from django import forms
 
-from django_bootstrap3_daterangepicker.fields import DateRangeField
-from django_bootstrap3_daterangepicker.widgets import DateRangeWidget, common_dates
+# from django_bootstrap3_daterangepicker.fields import DateRangeField
+# from django_bootstrap3_daterangepicker.widgets import DateRangeWidget, common_dates
 
 
 class SelectorForm(forms.Form):
@@ -65,7 +65,7 @@ class SelectorForm(forms.Form):
     #         return self.fields['name'].initial
     #     return name
 
-class PeriodFilter(forms.Form):
-    range = DateRangeField(widget=DateRangeWidget(picker_options={
-        'ranges': common_dates()
-    }))
+# class PeriodFilter(forms.Form):
+#     range = DateRangeField(widget=DateRangeWidget(picker_options={
+#         'ranges': common_dates()
+#     }))

@@ -14,5 +14,7 @@ urlpatterns = [
     url(r'^test/$', views.test_view, name='test'),
     url(r'^form/$', views.form_view, name='form'),
     url(r'^form_test/$', views.form_test_view, name='form_test'),
+    # url(r'^csv/([0-9]{4})/([0-9]{2})/$', views.month_csv, name='data2csv'),
+    url(r'^csv/(?P<year>[0-9]{4})/(?P<month>[0-9]{2})/$', views.month_csv, name='data2csv'),
     # url(r'^accounts/logout/$', views.logout_view(), name='logout'),
 ]

@@ -11,11 +11,16 @@ from .models import Data, Tag, Tag_group, Hourly, Daily, Config
 
 import dateutil.parser
 from datetime import date, timedelta
+from dateutil.relativedelta import relativedelta
 import pandas as pd
 
 from plotly.offline import plot
 from plotly.graph_objs import Bar, Scatter
 
+from django.template import loader, Context
+# from io import StringIO, BytesIO
+from StringIO import StringIO
+import csv
 
 is_ch = u'checked'
 not_ch = ''
@@ -221,7 +226,7 @@ def table_header(id_list, checked):
             u = t.group.unit_koef
         else:
             u = t.group.unit
-        result.append("{}, {}".format(t.name, u))
+        result.append("{} [{}]".format(t.name, u))
     return result
 
 
@@ -381,7 +386,7 @@ def inst_graph(request):
     })
 
 
-from forms import SelectorForm, PeriodFilter
+from forms import SelectorForm#, PeriodFilter
 
 def form_test_view(request):
     # form = PeriodFilter(initial={'range': (date.today(), date.today())})
@@ -397,6 +402,82 @@ def form_view(request):
         selector_form = SelectorForm()
     selector_form.is_valid()
     return render(request, 'web/base_form.html', {'form': selector_form})
+
+
+def get_data_records_new(checked, date_value_str_list, tag_list, lookup_table, minus_minutes=0):
+    records = lookup_table.objects.filter(tag__in=tag_list, ts__range=date_value_str_list).order_by('ts').all()
+    l = list(records.values('tag_id', 'ts', 'value'))
+    if len(l) < 1:
+        return None
+    else:
+        # print 'checked: koef:', checked['koef']
+        if checked['koef']:
+            t = tag_list[0]
+            gr = t.group
+            k = gr.koef
+        else:
+            k = 1
+        # print "k =",k
+        df = pd.DataFrame(l)
+        # df.loc[:, 'value'] = df['value'] * k
+        if k != 1:
+            df.loc[:, 'value'] *= k
+        if minus_minutes > 0:
+            df.loc[:, 'ts'] -= timedelta(minutes=minus_minutes)
+        df.loc[:, 'ts'] = df['ts'].dt.tz_convert('Europe/Moscow')
+        df.loc[:, 'ts'] = df['ts'].dt.strftime('%Y-%m-%d %H:%M')
+        return df
+
+
+@login_required()
+def month_csv(request, year, month):
+    try:
+        year=int(year)
+    except Exception as e:
+        raise Http404("smth wrong with year={} exception={}".format(
+            year, e)
+        )
+
+    
+    tag_name_list = [   'Ts_active', 
+                        'Ts_reactive',
+                        'Ts_phaseA',
+                        'Ts_phaseB',
+                        'Ts_phaseC',
+                    ]
+    tag_list = Tag.objects.filter(name__in=tag_name_list).all()
+    lookup_table = Hourly
+    ts_offset = 0
+    
+    date_str = "{}-{}-01".format(year, month)
+    date_date2 = dateutil.parser.parse(date_str)
+    date_date1 = date_date2 - relativedelta(months=1)
+    date_value = [t.date().isoformat() for t in [date_date1, date_date2]]
+    
+
+    df = get_data_records_new(checked={'koef': True}, date_value_str_list=date_value,
+                            tag_list=tag_list, lookup_table=lookup_table,
+                            minus_minutes=ts_offset,
+                            )
+    df_pivot = df.pivot_table(index="ts", columns="tag_id", values="value")
+    
+    col_names = df_pivot.columns.tolist()
+    df_pivot.columns = table_header(col_names, {'koef':True})
+    # buffer = StringIO()
+    buf_str=df_pivot.to_csv(None, header=True, index=True, encoding='utf-8')
+
+    response = HttpResponse(buf_str, content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="{}-{}.csv"'.format(year, month)
+
+    return response
+    # writer = csv.writer(response)
+
+    # t = loader.get_template('web/csv.html')
+    # c = {
+    #     'data': df_pivot,
+    # }
+    # response.write(t.render(c))
+    # return response
 
 
 
