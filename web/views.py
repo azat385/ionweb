@@ -450,8 +450,8 @@ def month_csv(request, year, month):
     ts_offset = 0
     
     date_str = "{}-{}-01".format(year, month)
-    date_date2 = dateutil.parser.parse(date_str)
-    date_date1 = date_date2 - relativedelta(months=1)
+    date_date1 = dateutil.parser.parse(date_str)
+    date_date2 = date_date1 + relativedelta(months=1)
     date_value = [t.date().isoformat() for t in [date_date1, date_date2]]
     
 
