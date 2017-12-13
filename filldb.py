@@ -177,6 +177,6 @@ def fill_daily():
 
 if __name__ == '__main__':
     fill_hourly()
-    # fill_daily()
+    fill_daily()
     # recalc_tag_koef()
     # mer230_base_tags()
