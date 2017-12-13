@@ -73,14 +73,19 @@ def mer230_base_tags():
 
 
 def data_sorted_records_m_h(current_tag):
-    last_record_hourly = Hourly.objects.filter(tag=current_tag).order_by('-id').first()
+    last_record_hourly = Hourly.objects.filter(tag=current_tag).last()
+    # last_record_hourly = Hourly.objects.filter(tag=current_tag).order_by('-id').first()
     if last_record_hourly is None:
         last_record_hourly_stime = datetime(2017, 1, 1, tzinfo=None)
         logger.debug("No last date in hourly table. The default is used")
+        id_value = 1
     else:
         last_record_hourly_stime = last_record_hourly.ts
-    data_records = Data.objects.filter(ts__gt=last_record_hourly_stime).filter(
+        id_value = last_record_hourly.end_data.id
+    data_records = Data.objects.filter(id__gte=id_value).filter(
                                        tag=current_tag).filter(ts__minute__lt=2).order_by('ts').all()
+    # data_records = Data.objects.filter(ts__gt=last_record_hourly_stime).filter(
+    #                                    tag=current_tag).filter(ts__minute__lt=2).order_by('ts').all()
     prev_hour = 66
     tag_list = []
     for r in data_records:
@@ -122,14 +127,19 @@ def fill_hourly():
 
 
 def hourly_sorted_records_m_h(current_tag):
-    last_record_daily = Daily.objects.filter(tag=current_tag).order_by('-id').first()
+    last_record_daily = Daily.objects.filter(tag=current_tag).last()
+    # last_record_daily = Daily.objects.filter(tag=current_tag).order_by('-id').first()
     if last_record_daily is None:
         last_record_hourly_stime = datetime(2017, 1, 1, tzinfo=None)
+        is_value = 1
         logger.debug("No last date in hourly table. The default is used")
     else:
         last_record_hourly_stime = last_record_daily.ts
-    hourly_records = Hourly.objects.filter(ts__gte=last_record_hourly_stime).filter(
+        id_value = last_record_daily.end_data.id
+    hourly_records = Hourly.objects.filter(id__gte=id_value).filter(
                                        tag=current_tag).filter(ts__hour=0).order_by('ts').all()
+    # hourly_records = Hourly.objects.filter(ts__gte=last_record_hourly_stime).filter(
+    #                                    tag=current_tag).filter(ts__hour=0).order_by('ts').all()
     return hourly_records
 
 
@@ -167,6 +177,6 @@ def fill_daily():
 
 if __name__ == '__main__':
     fill_hourly()
-    fill_daily()
+    # fill_daily()
     # recalc_tag_koef()
     # mer230_base_tags()
